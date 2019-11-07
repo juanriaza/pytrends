@@ -259,6 +259,9 @@ class TrendReq(object):
         elif self.geo == 'US' and resolution in ['DMA', 'CITY', 'REGION']:
             self.interest_by_region_widget['request'][
                 'resolution'] = resolution
+        elif self.geo.startswith('ES') and resolution in ['CITY', 'REGION']:
+            self.interest_by_region_widget['request'][
+                'resolution'] = resolution
 
         self.interest_by_region_widget['request'][
             'includeLowSearchVolumeGeos'] = inc_low_vol
@@ -279,14 +282,17 @@ class TrendReq(object):
         df = pd.DataFrame(req_json['default']['geoMapData'])
         if (df.empty):
             return df
-
+        if self.geo.startswith('ES'):
+            columns = ['geoName', 'value']
+        else:
+            columns = ['geoName', 'geoCode', 'value']
         # rename the column with the search keyword
-        df = df[['geoName', 'geoCode', 'value']].set_index(
+        df = df[columns].set_index(
             ['geoName']).sort_index()
         # split list columns into seperate ones, remove brackets and split on comma
         result_df = df['value'].apply(lambda x: pd.Series(
             str(x).replace('[', '').replace(']', '').split(',')))
-        if inc_geo_code:
+        if inc_geo_code and not self.geo.startswith('ES'):
             result_df['geoCode'] = df['geoCode']
 
         # rename each column with its search term
