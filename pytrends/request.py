@@ -281,7 +281,7 @@ class TrendReq(object):
             return df
 
         # rename the column with the search keyword
-        df = df[['geoName', 'geoCode', 'value']].set_index(
+        df = df[['geoName', 'value']].set_index(
             ['geoName']).sort_index()
         # split list columns into seperate ones, remove brackets and split on comma
         result_df = df['value'].apply(lambda x: pd.Series(
